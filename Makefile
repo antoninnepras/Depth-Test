@@ -1,5 +1,5 @@
 CC	= gcc
-CFLAGS	= -Wall
+CFLAGS	= -Wall -g
 LSFLAGS	= #insert link flags
 TARGETS	= cdep_test
 

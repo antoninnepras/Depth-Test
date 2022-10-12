@@ -12,6 +12,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define OK_DEPTH 3
 #define BLUE_COLOR "\e[32m"
@@ -21,7 +22,7 @@
 
 
 int
-print_file_depth(const char* filename);
+print_file_depth(const char* filename, int ok_depth);
 
 
 int
@@ -31,8 +32,24 @@ main(int argc, const char** argv)
     return 1;
   }
 
-  for (int i = 1; i < argc; ++i) {
-    if (print_file_depth(argv[i]) != 0) {
+  int ok_depth = OK_DEPTH;
+
+  int first_file_index = 1;
+
+  for (int i = 1; argv[i][0] == '-'; ++i) {
+    first_file_index++;
+    if (!strcmp(argv[i], "-t")) {
+      ++i;
+      if (sscanf(argv[i], "%i", &ok_depth) != 1) {
+        return 3;
+      }
+      first_file_index++;
+    }
+  }
+
+
+  for (int i = first_file_index; i < argc; ++i) {
+    if (print_file_depth(argv[i], ok_depth) != 0) {
       return 1;
     }
   }
@@ -42,9 +59,13 @@ main(int argc, const char** argv)
 
 
 int
-print_file_depth(const char* filename)
+print_file_depth(const char* filename, int ok_depth)
 {
   FILE* file = fopen(filename, "r");
+  if (file == NULL) {
+    return 1;
+  }
+
   int maxdep = 0;
   int dep = 0;
   int line = 1;
@@ -100,7 +121,7 @@ print_file_depth(const char* filename)
 
   // print info
   printf("%2sdepth: %i on line %5i in file %s%s\n",
-         maxdep >= OK_DEPTH ? (maxdep == OK_DEPTH ? YELLOW_COLOR : RED_COLOR)
+         maxdep >= ok_depth ? (maxdep == ok_depth ? YELLOW_COLOR : RED_COLOR)
                             : BLUE_COLOR,
          maxdep,
          maxdepline,
