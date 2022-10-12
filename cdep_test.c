@@ -1,3 +1,14 @@
+/**
+ * @file cdep_test.c
+ * @author Antonin Nepras
+ * @brief C depth testing
+ * @version 0.1
+ * @date 2022-10-12
+ *
+ * @copyright Copyright (c) 2022
+ *
+ */
+
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
