@@ -200,5 +200,9 @@ print_help(void)
          "    cdepth_test [options] [files]\n"
          "OPTIONS:\n"
          "    -h       |    print this help\n"
-         "    -t [n]   |    treshold of OK depth\n");
+         "    -t [n]   |    treshold of OK depth\n"
+         "EXAMPLE:\n"
+         "    cdepth_test -t 4 main.c                |  test main.c file\n"
+         "    cdepth_test (find ${dir} -name \"*.c\")  |  test all files in "
+         "current directory\n");
 }
