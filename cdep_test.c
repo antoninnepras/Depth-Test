@@ -20,6 +20,21 @@
 #define RED_COLOR "\e[31m"
 #define DEFAULT_COLOR "\e[0m"
 
+#define SUCCESS 0
+#define ERROR 1
+
+#define INPUT_ERROR 101
+#define OPTION_ERROR 102
+#define FILE_ERROR 103
+
+
+int
+get_file_max_depth(FILE* file, int* max_depth, int* line);
+
+
+int
+print_file_depth(const char* filename, int ok_depth);
+
 
 int
 print_file_depth(const char* filename, int ok_depth);
@@ -29,47 +44,54 @@ int
 main(int argc, const char** argv)
 {
   if (argc < 2) {
-    return 1;
+    fprintf(stderr, "Not enough arguments.\n");
+    return INPUT_ERROR;
   }
 
   int ok_depth = OK_DEPTH;
-
   int first_file_index = 1;
 
+  // read options
   for (int i = 1; argv[i][0] == '-'; ++i) {
     first_file_index++;
     if (!strcmp(argv[i], "-t")) {
       ++i;
-      if (sscanf(argv[i], "%i", &ok_depth) != 1) {
-        return 3;
+
+      if (i >= argc) {
+        fprintf(stderr, "Option %s needs additional argument.\n", argv[i - 1]);
+        return INPUT_ERROR;
       }
+
+      if (sscanf(argv[i], "%i", &ok_depth) != 1) {
+        fprintf(stderr, "Invalid option argument.\n");
+        return OPTION_ERROR;
+      }
+
       first_file_index++;
     }
   }
 
 
   for (int i = first_file_index; i < argc; ++i) {
-    if (print_file_depth(argv[i], ok_depth) != 0) {
-      return 1;
+    if (print_file_depth(argv[i], ok_depth) == ERROR) {
+      return FILE_ERROR;
     }
   }
 
-  return 0;
+  return SUCCESS;
 }
 
 
 int
-print_file_depth(const char* filename, int ok_depth)
+get_file_max_depth(FILE* file, int* max_depth, int* line)
 {
-  FILE* file = fopen(filename, "r");
-  if (file == NULL) {
-    return 1;
+  if (file == NULL || max_depth == NULL || line == NULL) {
+    return ERROR;
   }
 
-  int maxdep = 0;
   int dep = 0;
-  int line = 1;
-  int maxdepline = 0;
+  int current_line = 1;
+  *max_depth = 0;
   int c;
 
   bool ignore1 = false; // ""
@@ -100,33 +122,63 @@ print_file_depth(const char* filename, int ok_depth)
     // find parenthes
     if (c == '{') {
       ++dep;
-      if (dep > maxdep) {
-        maxdep = dep;
-        maxdepline = line;
+      if (dep > *max_depth) {
+        *max_depth = dep;
+        *line = current_line;
       }
     } else if (c == '}') {
       --dep;
     } else if (c == '\n') {
-      ++line;
+      ++current_line;
+    } else if (c == '"') {
+      ignore1 = true;
+    } else if (c == '\'') {
+      ignore2 = true;
     }
   }
 
-  fclose(file);
+  return SUCCESS;
+}
 
-  // non c - file
-  if (maxdep == 0) {
-    return 0;
+
+int
+get_filename_max_depth(const char* filename, int* max_depth, int* line)
+{
+  FILE* file = fopen(filename, "r");
+  if (file == NULL) {
+    return ERROR;
   }
 
+  int ret = get_file_max_depth(file, max_depth, line);
+
+  fclose(file);
+  return ret;
+}
+
+
+int
+print_file_depth(const char* filename, int ok_depth)
+{
+  int max_depth;
+  int line;
+  if (get_filename_max_depth(filename, &max_depth, &line) == ERROR) {
+    return ERROR;
+  }
+
+  // non c - file - skip
+  if (max_depth == 0) {
+    return SUCCESS;
+  }
 
   // print info
-  printf("%2sdepth: %i on line %5i in file %s%s\n",
-         maxdep >= ok_depth ? (maxdep == ok_depth ? YELLOW_COLOR : RED_COLOR)
-                            : BLUE_COLOR,
-         maxdep,
-         maxdepline,
+  printf("%s depth: %i on line %5i in file %s%s\n",
+         max_depth >= ok_depth
+           ? (max_depth == ok_depth ? YELLOW_COLOR : RED_COLOR)
+           : BLUE_COLOR,
+         max_depth,
+         line,
          filename,
          DEFAULT_COLOR);
 
-  return 0;
+  return SUCCESS;
 }
