@@ -27,5 +27,6 @@ cdepth_test $(find ${dir} -name "*.c")
 
 ## Options
 ```
+-h     | print help
 -t [n] | treshold
 ```

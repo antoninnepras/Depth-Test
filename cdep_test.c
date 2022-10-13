@@ -40,6 +40,10 @@ int
 print_file_depth(const char* filename, int ok_depth);
 
 
+void
+print_help(void);
+
+
 int
 main(int argc, const char** argv)
 {
@@ -50,6 +54,7 @@ main(int argc, const char** argv)
 
   int ok_depth = OK_DEPTH;
   int first_file_index = 1;
+
 
   // read options
   for (int i = 1; argv[i][0] == '-'; ++i) {
@@ -68,6 +73,9 @@ main(int argc, const char** argv)
       }
 
       first_file_index++;
+    } else if (!strcmp(argv[i], "-h")) {
+      print_help();
+      return 0;
     }
   }
 
@@ -181,4 +189,16 @@ print_file_depth(const char* filename, int ok_depth)
          DEFAULT_COLOR);
 
   return SUCCESS;
+}
+
+
+void
+print_help(void)
+{
+  printf("Test depth of c files\n"
+         "USAGE:\n"
+         "    cdepth_test [options] [files]\n"
+         "OPTIONS:\n"
+         "    -h       |    print this help\n"
+         "    -t [n]   |    treshold of OK depth\n");
 }
