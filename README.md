@@ -1,6 +1,20 @@
 # Depth Test
 - test depth of c files
 
+## Instalation
+```
+make
+make install
+```
+
+## Uninstalation
+```
+make uninstall
+```
+
+remove PATH=$PATH:~/.bin from yours .bahsrc
+
+
 ## Usage
 ```
 cdepth_test [options] [files]

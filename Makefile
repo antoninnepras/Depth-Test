@@ -29,5 +29,12 @@ clean:
 install:
 	mkdir -p ~/.bin
 	cp $(TARGETS) ~/.bin/
+	grep PATH:~/.bin ~/.bashrc || echo PATH=\$$PATH:~/.bin >> ~/.bashrc
+
+test:
+	grep PATH:~/.bin ~/.bashrc
+
+uninstall:
+	rm ~/.bin/$(TARGETS)
 
 .PHONY: clean format
